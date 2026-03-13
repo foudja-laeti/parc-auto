@@ -1,0 +1,41 @@
+name: CI - Parc Auto
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v3
+
+      - name: Installer Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Installer les dépendances
+        run: |
+          cd backend-auto
+          pip install -r requirements.txt
+
+      - name: Vérifier le code (flake8)
+        run: |
+          cd backend-auto
+          flake8 . --max-line-length=120 --exclude=migrations
+
+      - name: Lancer les tests (pytest)
+        run: |
+          cd backend-auto
+          pytest tests/ --junitxml=rapport-tests.xml -v
+
+      - name: Publier l'artefact (rapport de tests)
+        uses: actions/upload-artifact@v3
+        with:
+          name: rapport-tests
+          path: backend-auto/rapport-tests.xml
