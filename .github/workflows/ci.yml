@@ -35,7 +35,7 @@ jobs:
           pytest tests/ --junitxml=rapport-tests.xml -v
 
       - name: Publier l'artefact (rapport de tests)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: rapport-tests
           path: backend-auto/rapport-tests.xml
