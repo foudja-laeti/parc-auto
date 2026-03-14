@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Récupérer le code
+      - name: Recuperer le code
         uses: actions/checkout@v3
 
       - name: Installer Python
@@ -19,12 +19,12 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Installer les dépendances
+      - name: Installer les dependances
         run: |
           cd backend-auto
           pip install -r requirements.txt
 
-      - name: Vérifier le code (flake8)
+      - name: Verifier le code (flake8)
         run: |
           cd backend-auto
           flake8 . --max-line-length=120 --exclude=migrations
@@ -34,8 +34,30 @@ jobs:
           cd backend-auto
           pytest tests/ --junitxml=rapport-tests.xml -v
 
-      - name: Publier l'artefact (rapport de tests)
+      - name: Publier l artefact rapport de tests
         uses: actions/upload-artifact@v4
         with:
           name: rapport-tests
           path: backend-auto/rapport-tests.xml
+
+  cd:
+    runs-on: ubuntu-latest
+    needs: ci
+
+    steps:
+      - name: Recuperer le code
+        uses: actions/checkout@v3
+
+      - name: Connexion Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build image Docker
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/parc-auto-backend:latest ./backend-auto
+
+      - name: Push image sur Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/parc-auto-backend:latest
